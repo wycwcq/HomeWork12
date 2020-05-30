@@ -28,6 +28,42 @@ namespace Example12_2
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //services中存放了一组对象，包括DbContext对象、Controller对象等,用于依赖注入
+
+            services.AddDbContextPool<OrderContext>(options => options
+               // 连接字符串"todoDatabase" 可以在appsetting.json中设置
+               .UseMySql(Configuration.GetConnectionString("todoDatabase"),
+                   mySqlOptions => mySqlOptions
+                   .ServerVersion(new Version(5, 7, 30), ServerType.MySql)
+           ));
+            services.AddControllers(); //创建控制器对象，创建时进行依赖注入
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
             services.AddDbContextPool<OrderContext>(options =>
             options.UseMySql(Configuration.GetConnectionString("OrderDatabase"), mySqlOptions =>
             mySqlOptions.ServerVersion(new Version(8, 0, 19), ServerType.MySql)));
